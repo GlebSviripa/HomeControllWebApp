@@ -2,8 +2,8 @@
 
 This is simple web page on react for managing some Wi-Fi home devices. 
 
-Current list of devices:
-    * Based on ESP32 RGB led strip
+Current list of supported devices
+* Based on ESP32 RGB led strip 
 
 
 ## Run: 
