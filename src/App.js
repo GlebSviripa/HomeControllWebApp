@@ -6,12 +6,24 @@ import Container from "@material-ui/core/Container";
 import Paper from "@material-ui/core/Paper";
 import Slider from "@material-ui/core/Slider";
 import Api from './Api'
+import FormControl from "@material-ui/core/FormControl";
+import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
+import MenuItem from "@material-ui/core/MenuItem";
+import {withStyles} from "@material-ui/styles";
 
 const MenuStep = {
     Lights: 'lights',
     Stats: 'stats',
     About: 'about',
 }
+
+const RGBMode = {
+    Solid: 0,
+    Rainbow: 1,
+    PoliceAnimation: 2,
+}
+
 
 function App() {
     return <Main/>
@@ -40,11 +52,18 @@ class Main extends React.Component {
         Api.updateRGB({R: r, B: b, G: g})
     }
 
+    handleModeUpdate = (mode) => {
+        this.setState({mode: mode})
+        Api.updateMode(mode)
+    }
+
     render() {
         let page;
         switch (this.state.menuState) {
             case "lights":
-                page = <RGBSlider onUpdate={(r, g, b) => this.handleRGBUpdate(r, g, b)}/>
+                page = <RGBSlider onUpdate={(r, g, b) => this.handleRGBUpdate(r, g, b)}
+                                  onUpdateMode={(mode) => this.handleModeUpdate(mode)}
+                />
                 break;
             case "stats":
                 page = <Button>Stats</Button>
@@ -122,24 +141,58 @@ class Clock extends React.Component {
 
 
 function MainButtons(props) {
-    return <ButtonGroup fullWidth size="large" color="primary">
+    return <ButtonGroup fullWidth size="medium" color="primary">
         <Button onClick={props.onLights}>Lights</Button>
         <Button onClick={props.onStats}>Stats</Button>
         <Button onClick={props.onAbout}>About</Button>
     </ButtonGroup>
 }
 
+const PrettoSlider = withStyles({
+    root: {
+        color: '#52af77',
+        height: 8,
+    },
+    thumb: {
+        height: 24,
+        width: 24,
+        backgroundColor: '#fff',
+        border: '2px solid currentColor',
+        marginTop: -8,
+        marginLeft: -12,
+        '&:focus, &:hover, &$active': {
+            boxShadow: 'inherit',
+        },
+    },
+    active: {},
+    valueLabel: {
+        left: 'calc(-50% + 4px)',
+    },
+    track: {
+        height: 8,
+        borderRadius: 4,
+    },
+    rail: {
+        height: 8,
+        borderRadius: 4,
+    },
+})(Slider);
+
+
 class RGBSlider extends React.Component {
     constructor(props) {
         super(props);
-        this.state = {}
+        this.state = {mode: RGBMode.Solid}
         this.onUpdate = props.onUpdate
+        this.onUpdateMode = props.onUpdateMode
     }
 
 
+
+
     render() {
-        return <div>
-            <Slider onChangeCommitted={(event, value) => {
+        return <div id="content">
+            <PrettoSlider onChangeCommitted={(event, value) => {
                 this.setState({R: value})
             }}
                     style={{
@@ -151,7 +204,7 @@ class RGBSlider extends React.Component {
                     valueLabelDisplay="auto"
                     min={0}
                     max={225}/>
-            <Slider onChangeCommitted={(event, value) => {
+            <PrettoSlider onChangeCommitted={(event, value) => {
                 this.setState({G: value})
             }}
                     style={{
@@ -163,7 +216,7 @@ class RGBSlider extends React.Component {
                     valueLabelDisplay="auto"
                     min={0}
                     max={225}/>
-            <Slider onChangeCommitted={(event, value) => {
+            <PrettoSlider onChangeCommitted={(event, value) => {
                 this.setState({B: value})
             }}
                     style={{
@@ -176,6 +229,22 @@ class RGBSlider extends React.Component {
                     min={0}
                     max={225}/>
             <Button onClick={() => this.onUpdate(this.state.R, this.state.G, this.state.B)}>Update</Button>
+
+            <FormControl>
+                <InputLabel id="demo-simple-select-label">Age</InputLabel>
+                <Select
+                    labelId="demo-simple-select-label"
+                    id="demo-simple-select"
+                    value={this.state.mode}
+                    onChange={(event) => this.setState({mode: event.target.value})}
+                >
+                    <MenuItem value={RGBMode.Solid}>Solid</MenuItem>
+                    <MenuItem value={RGBMode.Rainbow}>Rainbow</MenuItem>
+                    <MenuItem value={RGBMode.PoliceAnimation}>PoliceAnimation</MenuItem>
+                </Select>
+            </FormControl>
+
+            <Button onClick={() => this.onUpdateMode(this.state.mode)}>Update Mode</Button>
         </div>
     }
 }
