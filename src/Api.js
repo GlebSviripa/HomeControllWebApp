@@ -1,16 +1,17 @@
 
 class Api {
-    static ip = "http://192.168.1.127"
 
-    static async updateRGB(RGB) {
+    static async updateRGB(RGB, ip) {
+        console.log(ip)
         const response =
-            await fetch(Api.ip + "/led?R=" + RGB.R + "&G=" + RGB.G + "&B=" + RGB.B, {mode: 'no-cors'})
+            await fetch(ip + "/led?R=" + RGB.R + "&G=" + RGB.G + "&B=" + RGB.B, {mode: 'no-cors'})
         console.log(await response.text())
     }
 
-    static async updateMode(mode) {
+    static async updateMode(mode, ip) {
+        console.log(ip)
         const response =
-            await fetch(Api.ip + "/ledMode?mode=" + mode.toString(), {mode: 'no-cors'})
+            await fetch(ip + "/ledMode?mode=" + mode.toString(), {mode: 'no-cors'})
         console.log(await response.text())
     }
 }

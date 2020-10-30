@@ -11,10 +11,11 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import {withStyles} from "@material-ui/styles";
+import TextField from "@material-ui/core/TextField";
 
 const MenuStep = {
     Lights: 'lights',
-    Stats: 'stats',
+    Settings: 'settings',
     About: 'about',
 }
 
@@ -33,15 +34,15 @@ class Main extends React.Component {
 
     constructor(props) {
         super(props);
-        this.state = {RGB: {R: 0, G: 0, B: 0}}
+        this.state = {RGB: {R: 0, G: 0, B: 0}, currentIP: "", devices: []}
     }
 
 
     handleLights = () => {
         this.setState({menuState: MenuStep.Lights})
     }
-    handleStats = () => {
-        this.setState({menuState: MenuStep.Stats})
+    handleSettings = () => {
+        this.setState({menuState: MenuStep.Settings})
     }
     handleAbout = () => {
         this.setState({menuState: MenuStep.About})
@@ -49,12 +50,19 @@ class Main extends React.Component {
 
     handleRGBUpdate = (r, g, b) => {
         this.setState({RGB: {R: r, G: g, B: b}})
-        Api.updateRGB({R: r, B: b, G: g})
+        this.state.devices.forEach(ip => Api.updateRGB({R: r, B: b, G: g}, ip))
+
     }
 
     handleModeUpdate = (mode) => {
         this.setState({mode: mode})
-        Api.updateMode(mode)
+        this.state.devices.forEach(ip => Api.updateMode(mode, ip))
+    }
+
+    handleAddingIP = (ip) => {
+        let tempDevices = this.state.devices
+        tempDevices.push(ip)
+        this.setState({currentIP: "", devices: tempDevices})
     }
 
     render() {
@@ -65,8 +73,12 @@ class Main extends React.Component {
                                   onUpdateMode={(mode) => this.handleModeUpdate(mode)}
                 />
                 break;
-            case "stats":
-                page = <Button>Stats</Button>
+            case "settings":
+                page = <Paper>
+                    <TextField id="standard-basic" label="Add IP here" value={this.state.currentIP}
+                               onChange={(event) => this.setState({currentIP: event.target.value})}/>
+                    <Button onClick={() => this.handleAddingIP(this.state.currentIP)}>Add</Button>
+                </Paper>
                 break;
             case "about":
                 page = <Button>About</Button>
@@ -90,7 +102,7 @@ class Main extends React.Component {
                     justifyContent: 'center',
                     alignItems: 'center'
                 }}>
-                    <MainButtons onLights={this.handleLights} onStats={this.handleStats}
+                    <MainButtons onLights={this.handleLights} onSettings={this.handleSettings}
                                  onAbout={this.handleAbout}/>
                 </Paper>
 
@@ -143,7 +155,7 @@ class Clock extends React.Component {
 function MainButtons(props) {
     return <ButtonGroup fullWidth size="medium" color="primary">
         <Button onClick={props.onLights}>Lights</Button>
-        <Button onClick={props.onStats}>Stats</Button>
+        <Button onClick={props.onSettings}>Settings</Button>
         <Button onClick={props.onAbout}>About</Button>
     </ButtonGroup>
 }
@@ -187,47 +199,44 @@ class RGBSlider extends React.Component {
         this.onUpdateMode = props.onUpdateMode
     }
 
-
-
-
     render() {
         return <div id="content">
             <PrettoSlider onChangeCommitted={(event, value) => {
                 this.setState({R: value})
             }}
-                    style={{
-                        position: 'relative',
-                        color: '#FF0000',
-                        width: 200
-                    }} defaultValue={0}
-                    aria-labelledby="discrete-slider"
-                    valueLabelDisplay="auto"
-                    min={0}
-                    max={225}/>
+                          style={{
+                              position: 'relative',
+                              color: '#FF0000',
+                              width: 200
+                          }} defaultValue={0}
+                          aria-labelledby="discrete-slider"
+                          valueLabelDisplay="auto"
+                          min={0}
+                          max={225}/>
             <PrettoSlider onChangeCommitted={(event, value) => {
                 this.setState({G: value})
             }}
-                    style={{
-                        position: 'relative',
-                        color: '#00FF00',
-                        width: 200
-                    }} defaultValue={0}
-                    aria-labelledby="discrete-slider"
-                    valueLabelDisplay="auto"
-                    min={0}
-                    max={225}/>
+                          style={{
+                              position: 'relative',
+                              color: '#00FF00',
+                              width: 200
+                          }} defaultValue={0}
+                          aria-labelledby="discrete-slider"
+                          valueLabelDisplay="auto"
+                          min={0}
+                          max={225}/>
             <PrettoSlider onChangeCommitted={(event, value) => {
                 this.setState({B: value})
             }}
-                    style={{
-                        position: 'relative',
-                        color: '#0000FF',
-                        width: 200
-                    }} defaultValue={0}
-                    aria-labelledby="discrete-slider"
-                    valueLabelDisplay="auto"
-                    min={0}
-                    max={225}/>
+                          style={{
+                              position: 'relative',
+                              color: '#0000FF',
+                              width: 200
+                          }} defaultValue={0}
+                          aria-labelledby="discrete-slider"
+                          valueLabelDisplay="auto"
+                          min={0}
+                          max={225}/>
             <Button onClick={() => this.onUpdate(this.state.R, this.state.G, this.state.B)}>Update</Button>
 
             <FormControl>
